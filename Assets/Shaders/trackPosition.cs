@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class trackPosition : MonoBehaviour
 {
-    private GameObject tracker;
+   /* private GameObject tracker;
     private Material grassMat;
 
     void Start()
@@ -17,5 +17,5 @@ public class trackPosition : MonoBehaviour
     {
         Vector3 trackerPos = tracker.GetComponent<Transform>().position;
         grassMat.SetVector("_trackerPosition", trackerPos);
-    }
+    }*/
 }
