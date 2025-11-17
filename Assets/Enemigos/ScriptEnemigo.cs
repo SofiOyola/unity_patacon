@@ -6,37 +6,33 @@ public class ScriptEnemigo : MonoBehaviour
     public NavMeshAgent agent;
     public Transform player;
     public LayerMask whatIsGround, whatIsPlayer;
-    public float health;
 
-    //Patrullar
+    // Vida del enemigo
+    public float health = 1f;
+
+    // Patrullar
     public Vector3 walkPoint;
-    bool walkPointSet; 
-    public float walkPointRange; //Rango
+    bool walkPointSet;
+    public float walkPointRange = 5f;
 
-    //Atacar
-    public float timeBetweenAttacks;
-    bool alredyAttacked;
-    public GameObject projectile;
-
-    //Estados
-    public float sightRange, attackRange;
-    public bool playerInSightRange, playerInAttackRange;
+    // Estados
+    public float sightRange = 10f;
+    public bool playerInSightRange;
 
     private void Awake()
     {
-        player = GameObject.Find("Player").transform;
+        player = GameObject.FindWithTag("Player").transform;
         agent = GetComponent<NavMeshAgent>();
     }
 
     private void Update()
     {
-        //Mirar sí está en la mira o zona de ataque
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
-        playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
-    
-        if (!playerInSightRange && !playerInAttackRange) Patroling();
-        if (playerInSightRange && !playerInAttackRange) ChasePlayer();
-        if (playerInSightRange && playerInAttackRange) AttackPlayer();
+
+        if (!playerInSightRange)
+            Patroling();
+        else
+            ChasePlayer();
     }
 
     private void Patroling()
@@ -57,10 +53,8 @@ public class ScriptEnemigo : MonoBehaviour
         float randomZ = Random.Range(-walkPointRange, walkPointRange);
         float randomX = Random.Range(-walkPointRange, walkPointRange);
 
-        //Buscar un punto random
         walkPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
-        
-        //Evitar que el punto quede por fuera del mapa
+
         if (Physics.Raycast(walkPoint, -transform.up, 2f, whatIsGround))
             walkPointSet = true;
     }
@@ -70,44 +64,26 @@ public class ScriptEnemigo : MonoBehaviour
         agent.SetDestination(player.position);
     }
 
-    private void AttackPlayer()
-    {
-        //Código del ataque
-        Rigidbody rb = Instantiate(projectile, transform.position, Quaternion.identity).GetComponent<Rigidbody>();
-        
-        rb.AddForce(transform.forward * 32f, ForceMode.Impulse);
-        rb.AddForce(transform.up * 8f, ForceMode.Impulse);
-
-        agent.SetDestination(transform.position);
-        transform.LookAt(player);
-        if (!alredyAttacked)
-        {
-            alredyAttacked = true;
-            Invoke(nameof(ResetAttack), timeBetweenAttacks);
-        }
-    }
-
-    private void ResetAttack()
-    {
-        alredyAttacked = false;
-    }
-
+    // Enemigo muere cuando recibe daño (ej: hacha)
     public void TakeDamage(int damage)
     {
-        health -= damage; 
+        health -= damage;
 
-        if (health <= 0) Invoke(nameof(DestroyEnemy), 0.5f);
+        if (health <= 0)
+            Destroy(gameObject);
     }
 
-    private void DestroyEnemy()
+    private void OnTriggerEnter(Collider other)
     {
-        Destroy(gameObject);
+        // Si toca al jugador → le hace daño
+        if (other.CompareTag("Player"))
+        {
+            other.GetComponent<PlayerLife>().PerderVida();
+        }
     }
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, sightRange);
     }
