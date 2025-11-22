@@ -5,7 +5,7 @@ public class CameraController : MonoBehaviour
     [Header("Camera Setup")]
     public Transform player;             
     public Transform cameraTarget;        
-    public Vector3 shoulderOffset = new Vector3(0.3f, 1.7f, -2f); 
+    public Vector3 shoulderOffset = new Vector3(0.3f, 10f, -8f); 
     public float followSpeed = 10f;    
     public float rotationSpeed = 5f;
     public float mouseSensitivity = 0.5f;
@@ -41,7 +41,7 @@ public class CameraController : MonoBehaviour
     void LateUpdate()
     {
         HandleInput();
-        UpdateCameraPosition();
+        UpdateCameraPositionAndRotation();
         /*
         if (player == null) return;
 
@@ -64,31 +64,26 @@ public class CameraController : MonoBehaviour
             transform.LookAt(player);*/
     }
 
-    void HandleInput()
+    private void HandleInput()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        if (playerController.IsMoving)
-        {
-            yaw = playerController.CurrentYaw;
-        }
-        else
-        {
-            yaw += mouseX * rotationSpeed;
-        }
+        yaw += mouseX;
 
-        pitch -= mouseY;
+        pitch -= mouseY * rotationSpeed;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-
     }
 
-    void UpdateCameraPosition()
+    private void UpdateCameraPositionAndRotation()
     {
-        Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
-        Vector3 targetPosition = cameraTarget.position + rotation * shoulderOffset;
-
-        mainCamera.position = Vector3.Lerp(mainCamera.position, targetPosition, followSpeed * Time.deltaTime);
-        mainCamera.LookAt(cameraTarget);
+        if (cameraTarget != null)
+            cameraTarget.rotation = Quaternion.Euler(0f, yaw, 0f);
+        else if (player != null)
+            player.rotation = Quaternion.Euler(0f, yaw, 0f);
+        Quaternion camRotation = Quaternion.Euler(pitch, yaw, 0f);
+        Vector3 desiredPosition = cameraTarget.position + camRotation * shoulderOffset;
+        mainCamera.position = Vector3.Lerp(mainCamera.position, desiredPosition, followSpeed * Time.deltaTime);
+        mainCamera.rotation = camRotation;
     }
 }

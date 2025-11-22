@@ -75,7 +75,8 @@ public class New_CharacterController : MonoBehaviour
 
         if(Input.GetButtonDown("Jump")&& IsGrounded){
             Velocity.y = Mathf.Sqrt(jumpHeight*-2f*gravity);
-            animator?.SetBool("isJumping", true);
+            animator.SetBool("isJumping", true);
+            Debug.Log("Salto");
 
         }
 
@@ -112,6 +113,5 @@ public class New_CharacterController : MonoBehaviour
         animator?.SetBool("IsGrounded", IsGrounded);
         animator?.SetFloat("VerticalSpeed", Velocity.y);
     }
-
 
 }
