@@ -21,10 +21,16 @@ public class ScriptVoladorEnemigo : MonoBehaviour
     public bool retreating = false;
 
     // Sube y baja
-    public float flightHeight = 5f;
     public float hoverAmplitude = 0.5f;
     public float hoverFrequency = 2f;
     private float baseY;
+
+    // Vuelo
+    public float minHeight = 3f;
+    public float maxHeight = 8f;
+    private float currentHeight;
+    private float heightChangeInterval = 5f;
+    private float heightTimer;
 
 
     // Distancia de retirada
@@ -49,6 +55,13 @@ private void Awake()
     {
         HoverMovement();
 
+        heightTimer += Time.deltaTime;
+        if (heightTimer >= heightChangeInterval)
+        {
+            currentHeight = Random.Range(minHeight, maxHeight);
+            heightTimer = 0f;
+        }
+
         // Detectar al jugador
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
 
@@ -63,9 +76,10 @@ private void Awake()
     // --- Movimiento de vuelo (hover) ---
     private void HoverMovement()
     {
-        float newY = baseY + flightHeight + Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
+        float newY = baseY + currentHeight + Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
     }
+
 
     // --- Patrulla aérea ---
     private void Patrol()
@@ -117,7 +131,6 @@ private void Awake()
             Destroy(gameObject);
     }
 
-    // --- Colisión con el jugador ---
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -135,7 +148,6 @@ private void Awake()
         }
     }
 
-    // --- Gizmos para debug ---
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
