@@ -28,6 +28,9 @@ public class Axe : MonoBehaviour
         axeRb = axe.GetComponent<Rigidbody>();
         axeRb.isKinematic = true;
         axeRb.useGravity = false;
+        axe.transform.position = axeTempHolder.transform.position;
+        axe.transform.rotation = axeTempHolder.transform.rotation;
+        axe.transform.parent = this.transform;
     }
 
     void FixedUpdate()
