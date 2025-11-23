@@ -6,18 +6,21 @@ public class MakeDamage : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        Health_and_Damage vida = other.GetComponentInParent<Health_and_Damage>();
+
+        if (vida != null)
         {
-            other.GetComponent<Health_and_Damage>().RestarVida(cantidad);
+            vida.RestarVida(cantidad);
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Player")
+        Health_and_Damage vida = other.GetComponentInParent<Health_and_Damage>();
+
+        if (vida != null)
         {
-            other.GetComponent<Health_and_Damage>().RestarVida(cantidad);
+            vida.RestarVida(cantidad);
         }
     }
 }
-

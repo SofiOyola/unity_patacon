@@ -20,7 +20,7 @@ public class New_CharacterController : MonoBehaviour
 
     private CharacterController characterController;
     private Vector3 Velocity;
-    private float currentSpeed;
+    public float currentSpeed;
     private float yaw;
     private Vector3 externalVelocity = Vector3.zero;
 
@@ -76,7 +76,6 @@ public class New_CharacterController : MonoBehaviour
         if(Input.GetButtonDown("Jump")&& IsGrounded){
             Velocity.y = Mathf.Sqrt(jumpHeight*-2f*gravity);
             animator.SetBool("isJumping", true);
-            Debug.Log("Salto");
 
         }
 
