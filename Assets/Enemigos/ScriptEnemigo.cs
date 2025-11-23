@@ -16,7 +16,7 @@ public class ScriptEnemigo : MonoBehaviour
     public float walkPointRange = 5f;
 
     // Estados
-    public float sightRange = 10f;
+    public float sightRange = 25f;
     public bool playerInSightRange;
 
     private void Awake()
@@ -84,7 +84,7 @@ public class ScriptEnemigo : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.yellow;
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, sightRange);
     }
 }

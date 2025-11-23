@@ -5,25 +5,26 @@ public class ScriptVoladorEnemigo : MonoBehaviour
 {
     public NavMeshAgent agent;
     public Transform player;
-    public LayerMask whatIsPlayer, whatIsGround;
+    public LayerMask whatIsPlayer;
 
     // Vida del enemigo
-    public float health = 1f;
+    public float health = 3f;
 
     // Patrullar
     public Vector3 flyPoint;
     bool flyPointSet;
-    public float flyPointRange = 5f;
+    public float flyPointRange = 10f;
 
     // Estados
-    public float sightRange = 10f;
+    public float sightRange = 100f;
     public bool playerInSightRange;
     public bool retreating = false;
 
     // Sube y baja
+    public float flightHeight = 5f;
     public float hoverAmplitude = 0.5f;
     public float hoverFrequency = 2f;
-    private float startY;
+    private float baseY;
 
 
     // Distancia de retirada
@@ -32,15 +33,19 @@ public class ScriptVoladorEnemigo : MonoBehaviour
     // Fuerza de empuje
     public float pushForce = 10f;
 
-    private void Awake()
+private void Awake()
     {
         player = GameObject.FindWithTag("Player").transform;
         agent = GetComponent<NavMeshAgent>();
-        startY = transform.position.y;
+
+        // El agente no debe rotar ni usar eje Y del NavMesh
+        agent.updateUpAxis = false;
+        agent.updateRotation = false;
+
+        baseY = transform.position.y;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         HoverMovement();
 
@@ -48,22 +53,22 @@ public class ScriptVoladorEnemigo : MonoBehaviour
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
 
         if (!playerInSightRange && !retreating)
-            Patroling();
+            Patrol();
         else if (playerInSightRange && !retreating)
             ChasePlayer();
         else if (retreating)
             RetreatFromPlayer();
     }
 
+    // --- Movimiento de vuelo (hover) ---
     private void HoverMovement()
     {
-        float newY = startY + Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
-        Vector3 position = transform.position;
-        position.y = newY;
-        transform.position = position;
+        float newY = baseY + flightHeight + Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
+        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
     }
 
-    private void Patroling()
+    // --- Patrulla aérea ---
+    private void Patrol()
     {
         if (!flyPointSet) SearchFlyPoint();
 
@@ -80,63 +85,60 @@ public class ScriptVoladorEnemigo : MonoBehaviour
     {
         float randomZ = Random.Range(-flyPointRange, flyPointRange);
         float randomX = Random.Range(-flyPointRange, flyPointRange);
-        float randomY = Random.Range(-flyPointRange, flyPointRange);
 
-        flyPoint = new Vector3(transform.position.x + randomX, transform.position.y + randomY, transform.position.z + randomZ);
-
-        if (Physics.Raycast(flyPoint, -transform.up, 2f, whatIsGround))
-            flyPointSet = true;
+        // El destino se calcula en el piso fantasma, luego se ajusta la altura
+        flyPoint = new Vector3(transform.position.x + randomX, baseY, transform.position.z + randomZ);
+        flyPointSet = true;
     }
 
+    // --- Persecución del jugador ---
     private void ChasePlayer()
     {
-        agent.SetDestination(player.position);
+        Vector3 groundTarget = new Vector3(player.position.x, baseY, player.position.z);
+        agent.SetDestination(groundTarget);
     }
 
+    // --- Retirada ---
     private void RetreatFromPlayer()
     {
         Vector3 directionAwayFromPlayer = (transform.position - player.position).normalized;
         Vector3 retreatPosition = transform.position + directionAwayFromPlayer * retreatDistance;
-        agent.SetDestination(retreatPosition);
+        agent.SetDestination(new Vector3(retreatPosition.x, baseY, retreatPosition.z));
 
         if (Vector3.Distance(transform.position, player.position) >= retreatDistance)
-        {
             retreating = false;
-        }
     }
 
+    // --- Daño y muerte ---
     public void TakeDamage(float damage)
     {
         health -= damage;
-
         if (health <= 0f)
-        {
             Destroy(gameObject);
-        }
     }
 
+    // --- Colisión con el jugador ---
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            // Daño al jugador
             other.GetComponent<PlayerLife>().PerderVida();
-            // Empujar al jugador hacia atrás
+
             Rigidbody rb = other.GetComponent<Rigidbody>();
             if (rb != null)
             {
                 Vector3 pushDirection = (other.transform.position - transform.position).normalized;
                 rb.AddForce(pushDirection * pushForce, ForceMode.Impulse);
             }
-            // Iniciar retirada
+
             retreating = true;
         }
     }
 
-
+    // --- Gizmos para debug ---
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.yellow;
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, sightRange);
     }
 }
