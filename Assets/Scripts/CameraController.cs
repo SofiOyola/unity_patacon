@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    
     [Header("Camera Setup")]
     public Transform player;             
     public Transform cameraTarget;        
