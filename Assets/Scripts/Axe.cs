@@ -7,6 +7,7 @@ public class Axe : MonoBehaviour
     public GameObject axe;
     public Rigidbody axeRb;
     public GameObject axeTempHolder;
+    public Camera playerCamera;
 
     //Variables para la hacha
     public float axeFlightSpeed = 10f;
@@ -70,11 +71,18 @@ public class Axe : MonoBehaviour
     void ThrownAxeWithPhysics()
     {
         axe.transform.parent = null;
+
         axeState = AxeState.Travelling;
         axeRb.isKinematic = false;
         axeRb.useGravity = true;
-        axeRb.AddForce(axe.transform.forward * axeThrowPower);
+
+        // Dirección de la cámara
+        Vector3 throwDirection = playerCamera.transform.forward;
+
+        // Aplicar fuerza en la dirección del mouse/cámara
+        axeRb.AddForce(throwDirection * axeThrowPower, ForceMode.Impulse);
     }
+
 
     void RecallAxe()
     {
