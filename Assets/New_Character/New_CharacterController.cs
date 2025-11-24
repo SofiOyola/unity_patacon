@@ -22,7 +22,7 @@ public class New_CharacterController : MonoBehaviour
     private Vector3 Velocity;
     public float currentSpeed;
     private float yaw;
-    private Vector3 externalVelocity = Vector3.zero;
+    public Vector3 externalVelocity = Vector3.zero;
 
     //Para determinar sí se está moviendo min48
     public bool IsMoving {get; private set;}
@@ -111,6 +111,19 @@ public class New_CharacterController : MonoBehaviour
         animator?.SetFloat("Speed", SpeedPercent, 0.1f, Time.deltaTime);
         animator?.SetBool("IsGrounded", IsGrounded);
         animator?.SetFloat("VerticalSpeed", Velocity.y);
+    }
+
+    // Función para aplicar knockback al personaje
+    public void ApplyKnockback(Vector3 sourcePosition, float verticalDistance, float horizontalDistance)
+    {
+        // Dirección desde el enemigo hacia el jugador
+        Vector3 directionAway = (transform.position - sourcePosition).normalized;
+
+        // Movimiento combinado: hacia arriba + hacia atrás
+        Vector3 knockback = (directionAway * horizontalDistance) + (Vector3.up * verticalDistance);
+
+        // Movimiento instantáneo
+        characterController.Move(knockback);
     }
 
 }
