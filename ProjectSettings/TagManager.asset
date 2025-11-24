@@ -8,6 +8,7 @@ TagManager:
   - PlayerInteractionZone
   - Axe
   - DeadZone
+  - Collectible
   layers:
   - Default
   - TransparentFX
