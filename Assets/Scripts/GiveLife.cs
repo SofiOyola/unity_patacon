@@ -14,12 +14,12 @@ public class GiveLife : MonoBehaviour
             // Activar el brillo mágico
             if (brilloMagico != null)
             {
-                brilloMagico.transform.parent = null;  // Para que quede flotando
+                brilloMagico.transform.parent = null;  
                 brilloMagico.Play();
-                Destroy(brilloMagico.gameObject, 2f); // Se limpia solo
+                Destroy(brilloMagico.gameObject, 2f); 
             }
 
-            Destroy(gameObject); // El polvo mágico desaparece
+            Destroy(gameObject); 
         }
     }
 }
