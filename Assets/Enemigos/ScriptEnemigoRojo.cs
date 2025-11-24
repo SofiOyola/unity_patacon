@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 public class ScriptEnemigoRojo : MonoBehaviour
 {
-public NavMeshAgent agent;
+    public NavMeshAgent agent;
     public Transform player;
     public LayerMask whatIsGround, whatIsPlayer;
 
@@ -16,35 +16,52 @@ public NavMeshAgent agent;
     public float walkPointRange = 10f;
 
     // Estados
-    public float sightRange = 60f;
+    public float sightRange = 40f;
     public bool playerInSightRange;
 
-    // Carrera
-    public float normalSpeed = 3.5f;
-    public float chargeSpeed = 10f;
-    public float retreatDistance = 3f;
-    public float pushForce = 15f; // más fuerte que el helicóptero
+    // Velocidades
+    public float normalSpeed = 8f;
+    public float chargeSpeed = 20f;
+
+    // Knockback
+    public float pushForce = 60f;
+    public float liftForce = 3f;
+
     private bool charging = false;
-    private bool preparingCharge = false;
+    
 
     private void Awake()
     {
         player = GameObject.FindWithTag("Player").transform;
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = normalSpeed;
+        agent.speed = normalSpeed; // empieza en velocidad normal
     }
+
 
     private void Update()
     {
+        // Detectar jugador
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
 
-        if (!playerInSightRange && !charging && !preparingCharge)
+        if (!playerInSightRange && !charging)
+        {
+            // Patrulla en velocidad normal
+            agent.speed = normalSpeed;
             Patroling();
-        else if (playerInSightRange && !charging && !preparingCharge)
-            PrepareCharge();
-        else if (charging)
+        }
+        else if (playerInSightRange && !charging)
+        {
+            // Detecta al jugador → inicia carga
+            charging = true;
+            agent.speed = chargeSpeed;
+        }
+
+        if (charging)
+        {
             ChargePlayer();
+        }
     }
+
 
     private void Patroling()
     {
@@ -59,6 +76,7 @@ public NavMeshAgent agent;
             walkPointSet = false;
     }
 
+
     private void SearchWalkPoint()
     {
         float randomZ = Random.Range(-walkPointRange, walkPointRange);
@@ -70,27 +88,9 @@ public NavMeshAgent agent;
             walkPointSet = true;
     }
 
-    private void PrepareCharge()
-    {
-        preparingCharge = true;
-
-        // Se echa hacia atrás un poquito
-        Vector3 dir = (transform.position - player.position).normalized;
-        Vector3 retreatPos = transform.position + dir * retreatDistance;
-
-        agent.SetDestination(retreatPos);
-
-        // Cuando llega al punto de retroceso, inicia la carrera
-        if (Vector3.Distance(transform.position, retreatPos) < 1f)
-        {
-            preparingCharge = false;
-            charging = true;
-            agent.speed = chargeSpeed;
-        }
-    }
-
     private void ChargePlayer()
     {
+        // Persigue directamente al jugador
         agent.SetDestination(player.position);
     }
 
@@ -99,10 +99,9 @@ public NavMeshAgent agent;
         health -= damage;
 
         // Si recibe daño mientras corre, reinicia
-        if (charging || preparingCharge)
+        if (charging)
         {
             charging = false;
-            preparingCharge = false;
             agent.speed = normalSpeed;
         }
 
@@ -114,16 +113,17 @@ public NavMeshAgent agent;
     {
         if (charging && other.CompareTag("Player"))
         {
-            // Empuje físico al jugador
-            Rigidbody rb = other.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                Vector3 pushDir = (other.transform.position - transform.position).normalized;
-                rb.AddForce(pushDir * pushForce, ForceMode.Impulse);
-            }
+            Health_and_Damage vida = other.GetComponent<Health_and_Damage>();
+            New_CharacterController controller = other.GetComponent<New_CharacterController>();
 
-            // Daño al jugador
-            other.GetComponent<PlayerLife>().PerderVida();
+            if (controller != null && vida != null)
+            {
+                // Knockback instantáneo diagonal
+                controller.ApplyKnockback(transform.position, liftForce, pushForce);
+
+                // Daño al jugador
+                vida.RestarVida(15);
+            }
 
             // Reinicia después del impacto
             charging = false;

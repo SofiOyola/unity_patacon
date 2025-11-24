@@ -34,10 +34,11 @@ public class ScriptVoladorEnemigo : MonoBehaviour
 
 
     // Distancia de retirada
-    public float retreatDistance = 5f;
+    public float retreatDistance = 35f;
 
     // Fuerza de empuje
-    public float pushForce = 10f;
+    public float pushForce = 8f;
+    public float liftForce = 2.5f;
 
 private void Awake()
     {
@@ -135,13 +136,16 @@ private void Awake()
     {
         if (other.CompareTag("Player"))
         {
-            other.GetComponent<PlayerLife>().PerderVida();
+            Health_and_Damage vida = other.GetComponent<Health_and_Damage>();
+            New_CharacterController controller = other.GetComponent<New_CharacterController>();
 
-            Rigidbody rb = other.GetComponent<Rigidbody>();
-            if (rb != null)
+            if (controller != null && vida != null)
             {
-                Vector3 pushDirection = (other.transform.position - transform.position).normalized;
-                rb.AddForce(pushDirection * pushForce, ForceMode.Impulse);
+                // Knockback instantáneo diagonal
+                controller.ApplyKnockback(transform.position, liftForce, pushForce); 
+
+                // Aplicar daño
+                vida.RestarVida(10);
             }
 
             retreating = true;

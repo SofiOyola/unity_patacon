@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - PlayerInteractionZone
+  - Axe
   layers:
   - Default
   - TransparentFX
