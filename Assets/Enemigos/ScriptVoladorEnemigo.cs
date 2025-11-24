@@ -87,7 +87,7 @@ private void Awake()
     {
         if (!flyPointSet) SearchFlyPoint();
 
-        if (flyPointSet)
+        if (flyPointSet && agent.isOnNavMesh)
             agent.SetDestination(flyPoint);
 
         Vector3 distanceToFlyPoint = transform.position - flyPoint;
@@ -109,12 +109,22 @@ private void Awake()
     // --- Persecución del jugador ---
     private void ChasePlayer()
     {
-        Vector3 groundTarget = new Vector3(player.position.x, baseY, player.position.z);
-        agent.SetDestination(groundTarget);
+        if (agent.isOnNavMesh)
+        {
+            Vector3 groundTarget = new Vector3(player.position.x, baseY, player.position.z);
+            agent.SetDestination(groundTarget);
+        }
     }
 
     // --- Retirada ---
     private void RetreatFromPlayer()
+    {
+        if (agent.isOnNavMesh)
+        {
+            PerformRetreat();
+        }
+    }
+    private void PerformRetreat()
     {
         Vector3 directionAwayFromPlayer = (transform.position - player.position).normalized;
         Vector3 retreatPosition = transform.position + directionAwayFromPlayer * retreatDistance;
