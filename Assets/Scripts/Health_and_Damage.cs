@@ -52,6 +52,11 @@ public class Health_and_Damage : MonoBehaviour
         }
 
     }
+    public void CurarVidaCompleta()
+    {
+        vida = 100;
+        UpdatedVidaCounterUI();
+    }
 
     void GameOver()
     {
