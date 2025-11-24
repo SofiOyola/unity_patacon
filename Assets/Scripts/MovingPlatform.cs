@@ -19,7 +19,7 @@ public class MovingPlatform : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         float currentHeight = transform.position.y;
         Vector3 movement = movingUp?Vector3.up : Vector3.down;
@@ -37,5 +37,26 @@ public class MovingPlatform : MonoBehaviour
             transform.position = new Vector3(transform.position.x, minY, transform.position.z);
             movingUp = true;
         }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Vector3 minPoint = new Vector3(transform.position.x, transform.position.y + minHeight, transform.position.z);
+        Vector3 maxPoint = new Vector3(transform.position.x, transform.position.y + maxHeight, transform.position.z);
+
+        Gizmos.DrawLine (minPoint, maxPoint);
+        Gizmos.DrawWireSphere (minPoint, 0.2f);
+        Gizmos.DrawWireSphere (maxPoint, 0.2f);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        other.transform.SetParent(transform);
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        other.transform.SetParent(null);
     }
 }
