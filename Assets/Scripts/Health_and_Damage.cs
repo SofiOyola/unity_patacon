@@ -1,9 +1,11 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 public class Health_and_Damage : MonoBehaviour
 {
     public int vida = 100;
+    public TextMeshProUGUI vidaCounter;
     public bool invencible = false;
     public float tiempo_invencible = 1f;
     public float tiempo_frenado = 0.2f;
@@ -13,6 +15,12 @@ public class Health_and_Damage : MonoBehaviour
     {
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
+        UpdatedVidaCounterUI();
+    }
+
+    public void UpdatedVidaCounterUI()
+    {
+        vidaCounter.text = $"{vida}";
     }
 
     public void SumarVida(int cantidadL){
@@ -23,6 +31,7 @@ public class Health_and_Damage : MonoBehaviour
             animator.SetTrigger("DamageTrigger");
             StartCoroutine(Invulnerabilidad());
             StartCoroutine(FrenarVelocidad());
+            UpdatedVidaCounterUI();
         }
 
     }
@@ -39,20 +48,14 @@ public class Health_and_Damage : MonoBehaviour
             {
                 GameOver();
             }
+            UpdatedVidaCounterUI();
         }
 
     }
 
     void GameOver()
     {
-        StartCoroutine(GameOverRoutine());
-    }
-
-    IEnumerator GameOverRoutine()
-    {
         Debug.Log("GAME OVER!!");
-        animator.Play("Dying");
-        yield return null; 
         Time.timeScale = 0;
     }
 

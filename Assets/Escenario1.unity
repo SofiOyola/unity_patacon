@@ -8575,6 +8575,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vida: 100
+  vidaCounter: {fileID: 320017539}
   invencible: 0
   tiempo_invencible: 1
   tiempo_frenado: 0.2
