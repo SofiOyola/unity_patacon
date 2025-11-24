@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "unity_patacon.sln"
+    "dotnet.defaultSolution": "juego.sln"
 }
